@@ -4,10 +4,10 @@ import CountryDropdown from "./CountryDropdown";
 import PropertyDropdown from "./PropertyDropdown";
 import PriceRangeDropdown from "./PriceRangeDropdown";
 import { IoSearchOutline } from "react-icons/io5";
-import { HouseContext } from "./HouseContext";
+import { StateContext } from "@/context";
 
 const Search = () => {
-  const { handleClick } = useContext(HouseContext);
+  const { handleClick } = useContext(StateContext);
   // console.log(houses);
 
   return (

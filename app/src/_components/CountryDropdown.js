@@ -1,10 +1,10 @@
 import { Menu } from "@headlessui/react";
 import React, { useContext, useState } from "react";
 import { RiArrowDownSLine, RiArrowUpSLine, RiMapPinLine } from "react-icons/ri";
-import { HouseContext } from "./HouseContext";
+import { StateContext } from "@/context";
 
 const CountryDropdown = () => {
-  const { country, setCountry, countries } = useContext(HouseContext);
+  const { country, setCountry, countries } = useContext(StateContext);
 
   const [isOpen, setIsOpen] = useState(false);
 

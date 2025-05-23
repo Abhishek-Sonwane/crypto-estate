@@ -1,12 +1,12 @@
 "use client";
 import React, { useContext } from "react";
-import { HouseContext } from "./HouseContext";
 import { ImSpinner2 } from "react-icons/im";
 import Link from "next/link";
 import House from "./House";
+import { StateContext } from "@/context";
 
 const HouseList = () => {
-  const { houses, loading } = useContext(HouseContext);
+  const { houses, loading } = useContext(StateContext);
 
   if (loading) {
     return (

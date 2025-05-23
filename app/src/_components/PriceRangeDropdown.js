@@ -5,10 +5,10 @@ import {
   RiArrowUpSLine,
   RiWallet3Line,
 } from "react-icons/ri";
-import { HouseContext } from "./HouseContext";
+import { StateContext } from "@/context";
 
 const PriceRangeDropdown = () => {
-  const { price, setPrice } = useContext(HouseContext);
+  const { price, setPrice } = useContext(StateContext);
 
   const [isOpen, setIsOpen] = useState(false);
 
