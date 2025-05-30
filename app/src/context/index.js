@@ -1,108 +1,26 @@
 "use client";
-import { housesData } from "@/assets";
+import { convertToFIAT } from "@/utils";
+import {
+  metamaskWallet,
+  useAddress,
+  useBalance,
+  useConnect,
+  useConnectionStatus,
+  useContract,
+  useContractEvents,
+  useContractRead,
+  useContractWrite,
+  useDisconnect,
+  useSigner,
+} from "@thirdweb-dev/react";
+import { ethers } from "ethers";
 import React, { createContext, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 export const StateContext = createContext();
 
 const ContextProvider = ({ children }) => {
-  const [houses, setHouses] = useState(housesData);
-  const [country, setCountry] = useState("Location (any)");
-  const [countries, setCountries] = useState([]);
-  const [property, setProperty] = useState("Property Type (any)");
-  const [properties, setProperties] = useState([]);
-  const [price, setPrice] = useState("Price Range (any)");
-  const [loading, setLoading] = useState(false);
-
-  // return all countries
-  useEffect(() => {
-    const allCountries = houses.map((house) => {
-      return house.country;
-    });
-
-    const uniqueCountries = ["Location (any)", ...new Set(allCountries)];
-
-    setCountries(uniqueCountries);
-  }, []);
-
-  // return all properties
-  useEffect(() => {
-    const allProperties = houses.map((house) => {
-      return house.type;
-    });
-
-    const uniqueProperties = ["Property Type (any)", ...new Set(allProperties)];
-
-    setProperties(uniqueProperties);
-  }, []);
-
-  const handleClick = () => {
-    setLoading(true);
-
-    // Create a function that checks if the string includes '(any)'
-
-    const isDefault = (str) => {
-      return str.split(" ").includes("(any)");
-    };
-
-    const minPrice = parseInt(price.split(" ")[0]);
-    const maxPrice = parseInt(price.split(" ")[2]);
-
-    const newHouses = housesData.filter((house) => {
-      const housePrice = parseInt(house.price);
-
-      if (
-        house.country === country &&
-        house.type === property &&
-        housePrice >= minPrice &&
-        housePrice <= maxPrice
-      ) {
-        return house;
-      }
-
-      if (isDefault(country) && isDefault(property) && isDefault(price)) {
-        return house;
-      }
-
-      if (!isDefault(country) && isDefault(property) && isDefault(price)) {
-        return house.country === country;
-      }
-
-      if (isDefault(country) && !isDefault(property) && isDefault(price)) {
-        return house.type === property;
-      }
-
-      if (isDefault(country) && isDefault(property) && !isDefault(price)) {
-        if (housePrice >= minPrice && housePrice <= maxPrice) {
-          return house;
-        }
-      }
-
-      if (!isDefault(country) && !isDefault(property) && isDefault(price)) {
-        return house.country === country && house.type === property;
-      }
-
-      if (!isDefault(country) && isDefault(property) && !isDefault(price)) {
-        if (housePrice >= minPrice && housePrice <= maxPrice) {
-          return house.country === country;
-        }
-      }
-
-      if (isDefault(country) && !isDefault(price) && !isDefault(price)) {
-        if (housePrice >= minPrice && housePrice <= maxPrice) {
-          return house.type === property;
-        }
-      }
-    });
-
-    setTimeout(() => {
-      return (
-        newHouses.length < 1 ? setHouses([]) : setHouses(newHouses),
-        setLoading(false)
-      );
-    }, 1000);
-  };
-
-  const CONTRACT_ADDRESS = "0xFaBBEba99d2A947F1AB98A0b013bC2ce3ded011d";
+  const CONTRACT_ADDRESS = "0xf7D02abac3CE6e68f1eA03E3989f2FBf48BCC434";
 
   const { contract } = useContract(CONTRACT_ADDRESS);
   const address = useAddress();
@@ -123,15 +41,100 @@ const ContextProvider = ({ children }) => {
     setIsLoading(true);
     const data = await getPropertiesData();
     setCryptoProperties(data);
+    setProperties(data);
     setIsLoading(false);
   };
 
   useEffect(() => {
-    setIsLoading(!isLoading);
-    if (address) fetchProperty();
+    if (contract) fetchProperty();
   }, [contract, address]);
 
-  // console.log(properties);
+  const [properties, setProperties] = useState();
+  const [city, setCity] = useState("Location (any)");
+  const [cities, setCities] = useState([]);
+  const [propertyType, setPropertyType] = useState("Property Type (any)");
+  const [propertiesType, setPropertiesType] = useState([]);
+  const [price, setPrice] = useState("Price Range (any)");
+  const [loading, setLoading] = useState(false);
+
+  const getAllCity = () => {
+    const allCities = cryptoProperties?.map((item) => {
+      return item.city;
+    });
+    setCities(["Location (any)", ...new Set(allCities)]);
+  };
+
+  const getPropertyType = () => {
+    const allPropertyType = cryptoProperties?.map((item) => {
+      return item.category;
+    });
+    setPropertiesType(["Location (any)", ...new Set(allPropertyType)]);
+  };
+
+  useEffect(() => {
+    if (cryptoProperties) getAllCity();
+  }, [cryptoProperties]);
+
+  useEffect(() => {
+    if (cryptoProperties) getPropertyType();
+  }, [cryptoProperties]);
+
+  const handleClick = () => {
+    setLoading(true);
+    // Create a function that checks if the string includes '(any)'
+    const isDefault = (str) => {
+      return str?.split(" ").includes("(any)");
+    };
+    const minPrice = parseInt(price.split(" ")[0]);
+    const maxPrice = parseInt(price.split(" ")[2]);
+    const sortedProperties = cryptoProperties?.filter((item) => {
+      const housePrice = parseInt(item.price);
+
+      if (
+        item.city === city &&
+        item.category === propertyType &&
+        housePrice >= minPrice &&
+        housePrice <= maxPrice
+      ) {
+        return item;
+      }
+      if (isDefault(city) && isDefault(propertyType) && isDefault(price)) {
+        return item;
+      }
+      if (!isDefault(city) && isDefault(propertyType) && isDefault(price)) {
+        return item.city === city;
+      }
+      if (isDefault(city) && !isDefault(propertyType) && isDefault(price)) {
+        return item.category === propertyType;
+      }
+      if (isDefault(city) && isDefault(propertyType) && !isDefault(price)) {
+        if (housePrice >= minPrice && housePrice <= maxPrice) {
+          return item;
+        }
+      }
+      if (!isDefault(city) && !isDefault(propertyType) && isDefault(price)) {
+        return item.city === city && item.category === propertyType;
+      }
+      if (!isDefault(city) && isDefault(propertyType) && !isDefault(price)) {
+        if (housePrice >= minPrice && housePrice <= maxPrice) {
+          return item.city === city;
+        }
+      }
+      if (isDefault(city) && !isDefault(propertyType) && !isDefault(price)) {
+        if (housePrice >= minPrice && housePrice <= maxPrice) {
+          return item.category === propertyType;
+        }
+      }
+    });
+    setTimeout(() => {
+      return (
+        sortedProperties.length < 1
+          ? setProperties([])
+          : setProperties(sortedProperties),
+        setLoading(false)
+      );
+    }, 1000);
+  };
 
   // FUNCTION --------->
   // 1. listProperty() ------->
@@ -140,30 +143,45 @@ const ContextProvider = ({ children }) => {
 
   const createPropertyFunction = async (form) => {
     const {
-      propertyTitle,
-      description,
-      category,
       price,
+      propertyTitle,
+      category,
       images,
       propertyAddress,
+      city,
+      subDistrict,
+      district,
+      pincode,
+      state,
+      country,
+      area,
+      propertyStatus,
+      description,
     } = form;
 
-    // e.preventDefault();
-
-    // console.log(form);
-
     try {
-      //   const listingPrice = await contract.call("listingPrice");
       const data = await contract.call("listProperty", [
         address,
-        price,
-        propertyTitle,
-        category,
-        images,
-        propertyAddress,
-        description,
+        [
+          price,
+          propertyTitle,
+          category,
+          images,
+          propertyAddress,
+          city,
+          subDistrict,
+          district,
+          pincode,
+          state,
+          country,
+          area,
+          propertyStatus,
+          description,
+        ],
       ]);
-      console.info("Contract Call Success", data);
+      // console.info("Contract Call Success", data);
+      if (data) toast.success("New Property Listed Succesfully");
+      return data;
     } catch (err) {
       console.error("Contract Call Failure", err);
     }
@@ -177,29 +195,22 @@ const ContextProvider = ({ children }) => {
   );
 
   const updatePropertyFunction = async (form) => {
-    const {
-      productId,
-      propertyTitle,
-      description,
-      category,
-      images,
-      propertyAddress,
-    } = form;
+    const { productID, propertyTitle, category, description, images } = form;
 
     try {
-      const data = await updateProperty({
-        args: [
-          address,
-          productId,
-          propertyTitle,
-          category,
-          images,
-          propertyAddress,
-          description,
-        ],
-      });
+      const data = await contract.call("updateProperty", [
+        address,
+        productID,
+        propertyTitle,
+        category,
+        description,
+        images,
+      ]);
       console.log("Contract Call Successfully Update", data);
+      toast.success("Property Updated Succesfully");
+      return data;
     } catch (err) {
+      toast.error("Failed to Update Property");
       console.error("Error while Updating Property Data", err);
     }
   };
@@ -215,9 +226,28 @@ const ContextProvider = ({ children }) => {
 
     try {
       const data = await updatePrice({
-        args: [address, productID, ethers.utils.parseEther(price)],
+        args: [address, productID, price],
       });
       console.log("Transaction Success", data);
+      fetchProperty();
+      toast.success("Succesfully Updated Property Price");
+    } catch (err) {
+      console.log("Transaction Failes", err);
+    }
+  };
+
+  const updatePropertyStatusFunction = async (form) => {
+    const { productID, newStatus } = form;
+
+    try {
+      const data = await contract.call("updatePropertyStatus", [
+        address,
+        productID,
+        newStatus,
+      ]);
+      console.log("Transaction Success", data);
+      fetchProperty();
+      toast.success("Succesfully Updated Property Status");
     } catch (err) {
       console.log("Transaction Failes", err);
     }
@@ -231,15 +261,24 @@ const ContextProvider = ({ children }) => {
 
   const buyPropertyFunction = async (buying) => {
     const { productID, amount } = buying;
-    const money = ethers.utils.parseEther(amount?.toString());
+    // const money = ethers.utils.parseEther(amount?.toString());
+    const money = amount;
 
     try {
       const data = await contract.call("buyProperty", [productID, address], {
         value: money,
       });
-      console.log("Buying Successful", data);
-      window.location.reload();
+      if (data) {
+        getPropertiesData();
+        toast.success("Property Purchased Successfully");
+        // console.log("Buying Successful", data);
+      } else {
+        toast.error("Failed to Purchase Property");
+        console.log("Error in buying function");
+      }
     } catch (err) {
+      toast.error("Failed to Purchase Property");
+
       console.log("Buying Failed", err);
     }
   };
@@ -254,9 +293,10 @@ const ContextProvider = ({ children }) => {
       const data = await addReview({
         args: [productID, rating, comment, address],
       });
+      toast.success("Review Added Successfully");
       console.info("Review Added", data);
-      window.location.reload();
     } catch (err) {
+      toast.error("Failed to Add Review");
       console.log("Review Not Added", err);
     }
   };
@@ -267,15 +307,11 @@ const ContextProvider = ({ children }) => {
   const likeReviewFunction = async (form) => {
     const { productID, reviewIndex } = form;
 
-    console.log(productID);
-    console.log(reviewIndex);
-
     try {
-      const data = await likeReview({
+      await likeReview({
         args: [productID, reviewIndex, address],
       });
-      console.info("Successfully Liked the Comment", data);
-      window.location.reload();
+      toast.success("Successfully Liked the Review");
     } catch (err) {
       console.error("Liking Fail", err);
     }
@@ -284,6 +320,10 @@ const ContextProvider = ({ children }) => {
   // GET PROPERTIES DATA SECTION
   // 7. getAllProperties()
   const getPropertiesData = async () => {
+    if (!contract) {
+      console.error("Contract not initialized");
+      return;
+    }
     try {
       // GET ALL PROPERTIES
       const properties = await contract.call("getAllProperties");
@@ -294,21 +334,34 @@ const ContextProvider = ({ children }) => {
 
       // GET USER BALANCE
       const balance = await signer?.getBalance();
-      const userBalance = address
+      const parsedBalance = address
         ? ethers.utils.formatEther(balance?.toString())
         : "";
-      setUserBalance(userBalance);
+      setUserBalance(parsedBalance);
+
+      // console.log(properties);
 
       const parsedProperties = properties?.map((property, i) => ({
         owner: property.owner,
-        title: property.propertyTitle,
+        propertyTitle: property.propertyTitle,
         description: property.description,
         category: property.category,
-        price: ethers.utils.formatEther(property.price.toString()),
+        // price: ethers.utils.formatEther(property.price.toString()),
+        price: property.price.toNumber(),
         productId: property.productID.toNumber(),
         reviewers: property.reviews,
         image: property.images,
-        address: property.propertyAddress,
+        propertyAddress: property.propertyAddress,
+        city: property.city,
+        subDistrict: property.subDistrict,
+        district: property.district,
+        ownershipHistory: property.ownershipHistory,
+        propertyStatus: property.propertyStatus,
+        area: property.area,
+        purchaseDate: property.purchaseDate,
+        pincode: property.pincode,
+        state: property.state,
+        country: property.country,
       }));
       return parsedProperties;
     } catch (error) {
@@ -349,15 +402,28 @@ const ContextProvider = ({ children }) => {
     try {
       const propertyItem = await contract.call("getProperty", [productID]);
 
+      // console.log(propertyItem);
+
       const parsedProperty = {
-        productID: propertyItem?.[0].toNumber(),
-        owner: propertyItem?.[1],
-        title: propertyItem?.[3],
-        category: propertyItem?.[4],
-        description: propertyItem?.[7],
-        price: ethers.utils.formatEther(propertyItem?.[2].toString()),
-        address: propertyItem?.[6],
-        images: propertyItem?.[5],
+        productID: propertyItem?.productID.toNumber(),
+        owner: propertyItem?.owner,
+        propertyTitle: propertyItem?.propertyTitle,
+        category: propertyItem?.category,
+        description: propertyItem?.description,
+        // price: ethers.utils.formatEther(propertyItem?.price.toString()),
+        price: propertyItem.price.toNumber(),
+        propertyAddress: propertyItem?.propertyAddress,
+        images: propertyItem?.images,
+        city: propertyItem?.city,
+        subDistrict: propertyItem?.subDistrict,
+        district: propertyItem?.district,
+        ownershipHistory: propertyItem?.ownershipHistory,
+        propertyStatus: propertyItem?.propertyStatus,
+        area: propertyItem?.area,
+        purchaseDate: propertyItem?.purchaseDate,
+        pincode: propertyItem?.pincode,
+        state: propertyItem?.state,
+        country: propertyItem?.country,
       };
       return parsedProperty;
     } catch (error) {
@@ -366,6 +432,11 @@ const ContextProvider = ({ children }) => {
   };
 
   // 11. getUserProperties()
+  const { mutateAsync: getUserProperties } = useContractWrite(
+    contract,
+    "getUserProperties"
+  );
+
   const getUserPropertiesFunction = async () => {
     try {
       const userProperties = await contract.call("getUserProperties", [
@@ -374,15 +445,26 @@ const ContextProvider = ({ children }) => {
 
       const parsedUserProperties = userProperties?.map((property, i) => ({
         owner: property?.owner,
-        title: property?.propertyTitle,
+        propertyTitle: property?.propertyTitle,
         description: property?.description,
         category: property?.category,
-        price: ethers.utils.formatEther(property?.price?.toString()),
+        // price: ethers.utils.formatEther(property.price.toString()),
+        price: property.price.toNumber(),
         productID: property?.productID.toNumber(),
         reviewers: property?.reviewers,
         reviews: property?.reviews,
         image: property?.images,
-        address: property?.propertyAddress,
+        propertyAddress: property?.propertyAddress,
+        city: property.city,
+        subDistrict: property.subDistrict,
+        district: property.district,
+        ownershipHistory: property.ownershipHistory,
+        propertyStatus: property.propertyStatus,
+        area: property.area,
+        purchaseDate: property.purchaseDate,
+        pincode: property.pincode,
+        state: property.state,
+        country: property.country,
       }));
 
       return parsedUserProperties;
@@ -394,9 +476,10 @@ const ContextProvider = ({ children }) => {
   // 12. getUserReviews()
   const getUserReviewsFunction = () => {
     try {
-      const { data: getUserReviews } = useContractRead("getUserReviews", [
-        address,
-      ]);
+      const { data: getUserReviews } = useContractRead({
+        functionName: "getUserReviews",
+        args: [address],
+      });
       return getUserReviews;
     } catch (error) {
       console.log("Error While getting user Reviews", error);
@@ -439,14 +522,6 @@ const ContextProvider = ({ children }) => {
   return (
     <StateContext.Provider
       value={{
-        houses,
-        setHouses,
-        country,
-        setCountry,
-        countries,
-        setCountries,
-        property,
-        setProperty,
         properties,
         setProperties,
         price,
@@ -457,6 +532,7 @@ const ContextProvider = ({ children }) => {
         address,
         contract,
         connect,
+        signer,
         metamask,
         createPropertyFunction,
         updatePropertyFunction,
@@ -467,6 +543,7 @@ const ContextProvider = ({ children }) => {
         getPropertiesData,
         getHighestRatedProduct,
         getProductReviewsFunction,
+        updatePropertyStatusFunction,
         getPropertyFunction,
         getUserPropertiesFunction,
         getUserReviewsFunction,
@@ -476,6 +553,17 @@ const ContextProvider = ({ children }) => {
         disconnect,
         cryptoProperties,
         setCryptoProperties,
+        isLoading,
+        setIsLoading,
+        city,
+        setCity,
+        cities,
+        setCities,
+        propertyType,
+        setPropertyType,
+        propertiesType,
+        setPropertiesType,
+        fetchProperty,
       }}
     >
       {children}

@@ -6,15 +6,15 @@ import House from "./House";
 import { StateContext } from "@/context";
 
 const HouseList = () => {
-  const { houses, loading } = useContext(StateContext);
+  const { properties, isLoading } = useContext(StateContext);
 
-  if (loading) {
+  if (isLoading || properties === undefined) {
     return (
       <ImSpinner2 className="mx-auto animate-spin text-violet-700 text-4xl my-[200px]" />
     );
   }
 
-  if (houses.length < 1) {
+  if (properties && properties.length < 1) {
     return (
       <div className="text-center text-3xl text-gray-400 my-48">
         Sorry, Nothing Found
@@ -26,9 +26,9 @@ const HouseList = () => {
     <section className="mb-20">
       <div className="container mx-auto">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-14">
-          {houses.map((house, index) => (
-            <Link key={index} href={`/propertyDetails/${house.id}`}>
-              <House house={house} />
+          {properties?.map((item, index) => (
+            <Link key={index} href={`/propertyDetails/${item.productId}`}>
+              <House house={item} />
             </Link>
           ))}
         </div>

@@ -2,10 +2,11 @@ import { images } from "@/assets";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import UserButton from "@/_components/UserButton";
 
 const Header = () => {
   return (
-    <header className="py-6 mb-12 border-b border-gray-300">
+    <header className="py-6 border-b border-gray-300">
       <div className="container mx-auto flex justify-between items-center lg:px-4">
         {/* Logo */}
         <Link href={"/"}>
@@ -13,7 +14,7 @@ const Header = () => {
         </Link>
 
         {/* Buttons */}
-        <div className="flex items-center gap-6 ">
+        {/* <div className="flex items-center gap-6 ">
           <Link className="hover:text-violet-900 transition" href={""}>
             Log in
           </Link>
@@ -23,7 +24,8 @@ const Header = () => {
           >
             Sign Up
           </Link>
-        </div>
+        </div> */}
+        <UserButton />
       </div>
     </header>
   );

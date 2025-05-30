@@ -1,11 +1,15 @@
 import logo_dark from "./dark_logo.png";
 import logo from "./logo.png";
 import banner_img from "./img/house-banner.png";
+import metamask_img from "./metamask.svg";
+import demo_profile from "./img/demo_profile.png";
 
 export const images = {
   logo,
   logo_dark,
   banner_img,
+  metamask_img,
+  demo_profile,
 };
 
 // import house images

@@ -12,14 +12,24 @@ body {
 }
 
 @theme {
-  --font-primary: "Poppins", sans-serif;
-  --color-primary: '#101828';
-  --color-secondary: '#7F56D9';
+  --font-primary: Poppins, sans-serif;
 
-  --boxShadow: {
-    1: 0px 4px 30px rgba(0, 0, 0, 0.08);
-  }
+  --color-primary-100: #f5f3ff;
+  --color-primary-100: #ede9fe;
+  --color-primary-200: #ddd6fe;
+  --color-primary-300: #c4b5fd;
+  --color-primary-400: #a78bfa;
+  --color-primary-500: #8b5cf6;
+  --color-primary-600: #7c3aed;
+  --color-primary-700: #6d28d9;
+  --color-primary-800: #5b21b6;
+  --color-primary-900: #4c1d95;
+  --color-primary-950: #2e1065;
+  --color-sccondary: #7F56D9;
 }
+
+
+
 
 .dropdown {
   @apply w-full lg:max-w-[296px] cursor-pointer outline-none;

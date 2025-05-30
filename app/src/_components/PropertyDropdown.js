@@ -4,7 +4,8 @@ import { RiArrowDownSLine, RiArrowUpSLine, RiHome5Line } from "react-icons/ri";
 import { StateContext } from "@/context";
 
 const PropertyDropdown = () => {
-  const { property, setProperty, properties } = useContext(StateContext);
+  const { propertyType, setPropertyType, propertiesType } =
+    useContext(StateContext);
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -17,7 +18,7 @@ const PropertyDropdown = () => {
         <RiHome5Line className="dropdown-icon-primary " />
         <div className="">
           <div className="text-[15px] font-medium leading-tight ">
-            {property}
+            {propertyType}
           </div>
           <div className="text-[13px] ">Select Your Property Type</div>
         </div>
@@ -28,15 +29,15 @@ const PropertyDropdown = () => {
         )}
       </Menu.Button>
       <Menu.Items className={"dropdown-menu"}>
-        {properties.map((property, index) => {
+        {propertiesType.map((propertyType, index) => {
           return (
             <Menu.Item
-              onClick={() => setProperty(property)}
+              onClick={() => setPropertyType(propertyType)}
               as={"li"}
               key={index}
               className={"cursor-pointer hover:text-violet-700 transition"}
             >
-              {property}
+              {propertyType}
             </Menu.Item>
           );
         })}

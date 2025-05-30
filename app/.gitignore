@@ -42,3 +42,5 @@ next-env.d.ts
 
 
 /.cloc-2.04.exe
+# clerk configuration (can include secrets)
+/.clerk/
