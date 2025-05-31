@@ -476,10 +476,9 @@ const ContextProvider = ({ children }) => {
   // 12. getUserReviews()
   const getUserReviewsFunction = () => {
     try {
-      const { data: getUserReviews } = useContractRead({
-        functionName: "getUserReviews",
-        args: [address],
-      });
+      const { data: getUserReviews } = contract.call("getUserReviews", [
+        address,
+      ]);
       return getUserReviews;
     } catch (error) {
       console.log("Error While getting user Reviews", error);
