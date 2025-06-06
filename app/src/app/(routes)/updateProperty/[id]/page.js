@@ -1,7 +1,7 @@
 "use client";
 import { StateContext } from "@/context";
 import { useParams, useRouter } from "next/navigation";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ImSpinner } from "react-icons/im";
 
@@ -16,7 +16,7 @@ const UpdatePropertyPage = () => {
 
   const router = useRouter();
 
-  async function fetchdata() {
+  const fetchdata = useCallback(async () => {
     const data = await getPropertyFunction(id);
     if (data) {
       // Set individual form fields
@@ -28,24 +28,8 @@ const UpdatePropertyPage = () => {
         setImage(data.images);
       }
     }
-    // reset({
-    //   propertyTitle: property.title,
-    //   description: property.description,
-    //   category: property.category,
-    //   images: property.images,
-    //   propertyAddress: property.address,
-    //   area: property.area,
-    //   city: property.city,
-    //   state: property.state,
-    //   country: property.country,
-    //   district: property.district,
-    //   subDistrict: property.subDistrict,
-    //   propertyStatus: property.propertyStatus,
-    //   pincode: property.pincode,
-    //   productID: productID,
-    // });
     setProperty(data);
-  }
+  }, []);
 
   useEffect(() => {
     fetchdata();
