@@ -125,6 +125,8 @@ const Page = () => {
     setFiatPrice(price);
   };
 
+  console.log(property);
+
   return (
     <>
       {property ? (
@@ -173,7 +175,7 @@ const Page = () => {
               </div>
 
               <div className="flex-1 bg-white w-full h-full mb-8 border border-gray-300 rounded-lg px-6 py-8">
-                <ProfileCard />
+                <ProfileCard user={property.owner} />
 
                 <div className="mx-6">
                   <h2 className="text-2xl font-semibold">{property.title}</h2>

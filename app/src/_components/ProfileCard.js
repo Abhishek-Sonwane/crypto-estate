@@ -13,7 +13,7 @@ const ProfileCard = ({ user }) => {
         />
         <div className="flex flex-col justify-center">
           <h1 className="font-primary font-semibold text-xl">
-            {user ? user.name : "Username"}
+            {user ? user : "Username"}
           </h1>
           <h3 className="text-base text-gray-500 font-light">Owner</h3>
         </div>
